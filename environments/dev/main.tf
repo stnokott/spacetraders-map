@@ -6,6 +6,16 @@ provider "google" {
   project = var.project
 }
 
+module "services" {
+  source   = "../../modules/services"
+  project  = var.project
+  services = ["cloudbuild.googleapis.com"]
+}
+
+module "access" {
+  source = "../../modules/access"
+}
+
 module "vpc" {
   source  = "../../modules/vpc"
   project = var.project

@@ -10,11 +10,10 @@ resource "random_id" "default" {
 
 resource "google_storage_bucket" "terraform-backend" {
   project  = var.project
-  name     = "${random_id.default.hex}-terraform-remote-backend"
+  name     = "${random_id.default.hex}-terraform-backend"
   location = "US"
 
   force_destroy               = false
-  public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
 
   versioning {
