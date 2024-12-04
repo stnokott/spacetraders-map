@@ -1,5 +1,5 @@
 module "services" {
-  source   = "../../modules/services"
+  source   = "../services"
   project  = var.project
   services = ["storage.googleapis.com"]
 }

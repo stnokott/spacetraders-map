@@ -1,12 +1,11 @@
 data "google_project" "project" {
 }
 
-data "google_iam_policy" "cloudbuild" {
-  binding {
-    role = "roles/editor"
+resource "google_project_iam_binding" "project" {
+  project = data.google_project.project.id
+  role    = "roles/editor"
 
-    members = [
-      "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
-    ]
-  }
+  members = [
+    "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com",
+  ]
 }

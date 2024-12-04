@@ -1,18 +1,6 @@
-module "buckets" {
-  source  = "../../modules/buckets"
-  project = var.project
-}
-
-resource "local_file" "default" {
-  file_permission = "0644"
-  filename        = "${path.module}/backend.tf"
-
-  content = <<-EOT
-  terraform {
-    backend "gcs" {
-      bucket = "${module.buckets.name_terraform}"
-      prefix = "env/dev"
-    }
+terraform {
+  backend "gcs" {
+    bucket = "7ab0f1e1bb84316e-terraform-backend"
+    prefix = "env/dev"
   }
-  EOT
 }

@@ -17,6 +17,12 @@ locals {
   network = element(split("-", var.subnet), 0)
 }
 
+module "services" {
+  source   = "../services"
+  project  = var.project
+  services = ["compute.googleapis.com"]
+}
+
 resource "google_compute_instance" "http_server" {
   project      = var.project
   zone         = "us-east1-b"
