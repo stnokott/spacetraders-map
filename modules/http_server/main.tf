@@ -20,7 +20,7 @@ locals {
 module "services" {
   source   = "../services"
   project  = var.project
-  services = ["compute.googleapis.com"]
+  services = ["compute.googleapis.com", "cloudresourcemanager.googleapis.com"]
 }
 
 resource "google_compute_instance" "http_server" {
