@@ -19,7 +19,7 @@ resource "local_file" "default" {
   terraform {
     backend "gcs" {
       bucket = "${module.buckets.name_terraform}"
-      prefix = "env/dev"
+      prefix = "env/prod"
     }
   }
   EOT
