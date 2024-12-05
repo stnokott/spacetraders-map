@@ -6,33 +6,10 @@ provider "google" {
   project = var.project
 }
 
-module "buckets" {
-  source  = "../../modules/buckets"
+module "common" {
+  source  = "../../modules/common"
   project = var.project
-}
-
-resource "local_file" "default" {
-  file_permission = "0644"
-  filename        = "${path.module}/backend.tf"
-
-  content = <<-EOT
-  terraform {
-    backend "gcs" {
-      bucket = "${module.buckets.name_terraform}"
-      prefix = "env/dev"
-    }
-  }
-  EOT
-}
-
-module "services" {
-  source   = "../../modules/services"
-  project  = var.project
-  services = ["cloudbuild.googleapis.com"]
-}
-
-module "access" {
-  source = "../../modules/access"
+  env     = local.env
 }
 
 module "vpc" {

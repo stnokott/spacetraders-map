@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "7ab0f1e1bb84316e-terraform-backend"
+    bucket = "015903a693674873-terraform-backend"
     prefix = "env/dev"
   }
 }

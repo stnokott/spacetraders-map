@@ -1,1 +1,2 @@
 variable "project" {}
+variable "env" {}
