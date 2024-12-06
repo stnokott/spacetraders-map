@@ -25,15 +25,6 @@ module "gcp_apis" {
 
 data "google_project" "project" {}
 
-resource "google_project_iam_binding" "project" {
-  project = var.project
-  role    = "roles/editor"
-
-  members = [
-    "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
-  ]
-}
-
 resource "google_compute_instance" "http_server" {
   project      = var.project
   zone         = var.zone
