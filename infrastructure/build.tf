@@ -34,11 +34,11 @@ resource "google_artifact_registry_repository" "default" {
 locals {
   github_repo_url                    = "https://github.com/stnokott/spacetraders-map.git"
   github_cloud_build_installation_id = 57972476 // from https://github.com/settings/installations
-  github_token_secret_id             = "github_token_secret"
+  github_token_secret_id             = "github_token"
 }
 
 // token needs to be set manually after secret creation, see https://cloud.google.com/secret-manager/docs/add-secret-version#secretmanager-add-secret-version-gcloud
-resource "google_secret_manager_secret" "github_token_secret" {
+resource "google_secret_manager_secret" "github_token" {
   project   = var.project
   secret_id = local.github_token_secret_id
 
@@ -49,7 +49,7 @@ resource "google_secret_manager_secret" "github_token_secret" {
 
 data "google_secret_manager_secret_version" "github_token" {
   secret     = local.github_token_secret_id
-  depends_on = [google_secret_manager_secret.github_token_secret]
+  depends_on = [google_secret_manager_secret.github_token]
 }
 
 data "google_project" "project" {}
@@ -93,8 +93,8 @@ data "google_iam_policy" "cloudbuild_secrets" {
 }
 
 resource "google_secret_manager_secret_iam_policy" "policy" {
-  project     = google_secret_manager_secret.github_token_secret.project
-  secret_id   = google_secret_manager_secret.github_token_secret.secret_id
+  project     = google_secret_manager_secret.github_token.project
+  secret_id   = google_secret_manager_secret.github_token.secret_id
   policy_data = data.google_iam_policy.cloudbuild_secrets.policy_data
   depends_on  = [google_project_iam_member.cloudbuild_service_account]
 }
