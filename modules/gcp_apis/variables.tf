@@ -1,5 +1,5 @@
 variable "project" {}
 
-variable "services" {
+variable "apis" {
   type = list(string)
 }

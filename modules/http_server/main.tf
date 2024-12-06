@@ -17,15 +17,26 @@ locals {
   network = element(split("-", var.subnet), 0)
 }
 
-module "services" {
-  source   = "../services"
-  project  = var.project
-  services = ["compute.googleapis.com", "cloudresourcemanager.googleapis.com"]
+module "gcp_apis" {
+  source  = "../gcp_apis"
+  project = var.project
+  apis    = ["compute.googleapis.com", "cloudresourcemanager.googleapis.com"]
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_binding" "project" {
+  project = var.project
+  role    = "roles/editor"
+
+  members = [
+    "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
+  ]
 }
 
 resource "google_compute_instance" "http_server" {
   project      = var.project
-  zone         = "us-east1-b"
+  zone         = var.zone
   name         = "${local.network}-apache2-instance"
   machine_type = "e2-micro"
 

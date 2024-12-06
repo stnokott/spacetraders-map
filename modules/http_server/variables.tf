@@ -14,4 +14,5 @@
 
 
 variable "project" {}
+variable "zone" {}
 variable "subnet" {}
