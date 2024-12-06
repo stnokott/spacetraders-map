@@ -142,5 +142,85 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     }
   }
 
-  filename = "cloudbuild.yaml"
+  build {
+    options {
+      // small-scale project, no need for persistent logs
+      logging = "CLOUD_LOGGING_ONLY"
+    }
+
+    step {
+      id         = "tf init"
+      name       = "hashicorp/terraform:1.10.0"
+      entrypoint = "sh"
+      args = [
+        "-c",
+        <<-EOT
+          if [ -d "environments/$BRANCH_NAME/" ]; then
+            cd environments/$BRANCH_NAME
+            terraform init
+          else
+            for dir in environments/*/
+            do 
+              cd $${dir}   
+              env=$${dir%*/}
+              env=$${env#*/}
+              echo ""
+              echo "*************** TERRAFORM INIT ******************"
+              echo "******* At environment: $${env} ********"
+              echo "*************************************************"
+              terraform init || exit 1
+              cd ../../
+            done
+          fi
+        EOT
+      ]
+    }
+
+    step {
+      id         = "tf plan"
+      name       = "hashicorp/terraform:1.10.0"
+      entrypoint = "sh"
+      args = [
+        "-c",
+        <<-EOT
+          if [ -d "environments/$BRANCH_NAME/" ]; then
+            cd environments/$BRANCH_NAME
+            terraform plan
+          else
+            for dir in environments/*/
+            do 
+              cd $${dir}   
+              env=$${dir%*/}
+              env=$${env#*/}  
+              echo ""
+              echo "*************** TERRAFORM PLAN ******************"
+              echo "******* At environment: $${env} ********"
+              echo "*************************************************"
+              terraform plan || exit 1
+              cd ../../
+            done
+          fi
+        EOT
+      ]
+    }
+
+    step {
+      id         = "tf apply"
+      name       = "hashicorp/terraform:1.10.0"
+      entrypoint = "sh"
+      args = [
+        "-c",
+        <<-EOT
+          if [ -d "environments/$BRANCH_NAME/" ]; then
+            cd environments/$BRANCH_NAME      
+            terraform apply -auto-approve
+          else
+            echo "***************************** SKIPPING APPLYING *******************************"
+            echo "Branch '$BRANCH_NAME' does not represent an official environment."
+            echo "*******************************************************************************"
+          fi
+        EOT
+      ]
+    }
+  }
 }
