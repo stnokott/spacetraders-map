@@ -1,2 +1,2 @@
 project = "spacetraders-map-123"
-zone    = "us-east1-b"
+zone    = "us-central1-a"
