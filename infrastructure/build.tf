@@ -81,7 +81,7 @@ resource "google_project_iam_member" "cloudbuild_builder" {
 }
 
 // Allow editing project (required for `terraform apply` during Cloud Build)
-resource "google_project_iam_member" "cloudbuild_compute" {
+resource "google_project_iam_member" "cloudbuild_editor" {
   project = var.project
   role    = "roles/editor"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
