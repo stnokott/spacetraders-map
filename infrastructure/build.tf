@@ -157,6 +157,19 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     images = ["${local.server_image_url}:$BRANCH_NAME"]
 
     step {
+      id         = "tf apply infrastructure"
+      name       = "hashicorp/terraform:1.10.0"
+      entrypoint = "sh"
+      args = [
+        "-c",
+        <<-EOT
+          cd infrastructure
+          terraform apply -auto-approve
+        EOT
+      ]
+    }
+
+    step {
       id         = "build image"
       name       = "gcr.io/buildpacks/builder:latest"
       dir        = "service"
@@ -171,7 +184,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     }
 
     step {
-      id         = "tf init"
+      id         = "tf init env"
       name       = "hashicorp/terraform:1.10.0"
       entrypoint = "sh"
       args = [
@@ -199,7 +212,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     }
 
     step {
-      id         = "tf plan"
+      id         = "tf plan env"
       name       = "hashicorp/terraform:1.10.0"
       entrypoint = "sh"
       args = [
@@ -227,7 +240,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     }
 
     step {
-      id         = "tf apply"
+      id         = "tf apply env"
       name       = "hashicorp/terraform:1.10.0"
       entrypoint = "sh"
       args = [
