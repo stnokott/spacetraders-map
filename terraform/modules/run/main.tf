@@ -1,7 +1,7 @@
 module "gcp_apis" {
   source  = "../../modules/gcp_apis"
   project = var.project
-  apis    = ["compute.googleapis.com", "run.googleapis.com"]
+  apis    = ["compute.googleapis.com", "run.googleapis.com", "cloudresourcemanager.googleapis.com"]
 }
 
 module "common_vars" {
