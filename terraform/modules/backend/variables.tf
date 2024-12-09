@@ -1,6 +1,5 @@
 variable "project" {}
-variable "env" {}
-variable "region" {}
-variable "filename" {
-  default = "backend"
+variable "bucket_name" {
+  description = "Will be extended with random integer to ensure global uniqueness"
 }
+variable "region" {}
