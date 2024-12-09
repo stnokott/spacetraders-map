@@ -47,10 +47,17 @@ resource "google_project_iam_member" "cloudbuild_builder" {
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
-// Allow editing project (required for `terraform apply` during Cloud Build)
+// Allow editing project (required for several commands in `terraform apply` during Cloud Build)
 resource "google_project_iam_member" "cloudbuild_editor" {
   project = module.common_vars.project
   role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+// Allow editing Cloud Run settings (required for setting public access for Cloud Run services)
+resource "google_project_iam_member" "cloudbuild_run_admin" {
+  project = module.common_vars.project
+  role    = "roles/run.admin"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
