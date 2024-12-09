@@ -1,40 +1,9 @@
-# create Artifact Registry repository
-resource "google_artifact_registry_repository" "default" {
-  location      = provider::google::region_from_zone(var.zone)
-  repository_id = "spacetraders-map-repo"
-  description   = "Container registry for Spacetraders Map project"
-  format        = "docker"
-
-  // TODO: set to false once correct policies are confirmed
-  cleanup_policy_dry_run = true
-
-  // keep [prod] images
-  cleanup_policies {
-    id     = "keep-all-prod"
-    action = "KEEP"
-    condition {
-      tag_state    = "TAGGED"
-      tag_prefixes = ["prod"]
-    }
-  }
-
-  // keep 5 most recent [dev] images
-  cleanup_policies {
-    id     = "delete-old-dev"
-    action = "DELETE"
-    condition {
-      tag_state    = "TAGGED"
-      tag_prefixes = ["dev"]
-      older_than   = format("%ds", 7 * 24 * 60 * 60) // 7 days
-    }
-  }
-  depends_on = [module.gcp_apis]
-}
-
 locals {
   github_repo_url                    = "https://github.com/stnokott/spacetraders-map.git"
   github_cloud_build_installation_id = 57972476 // from https://github.com/settings/installations
   github_token_secret_id             = "github_token"
+  artifact_repository_name           = "spacetraders-map"
+  server_image_name                  = "server"
 }
 
 // token needs to be set manually after secret creation, see https://cloud.google.com/secret-manager/docs/add-secret-version#secretmanager-add-secret-version-gcloud
@@ -129,6 +98,43 @@ resource "google_cloudbuildv2_repository" "github-repo" {
   remote_uri        = local.github_repo_url
 }
 
+// Create Artifact Registry repository
+resource "google_artifact_registry_repository" "default" {
+  location      = provider::google::region_from_zone(var.zone)
+  repository_id = local.artifact_repository_name
+  description   = "Container registry for Spacetraders Map project"
+  format        = "docker"
+
+  // TODO: set to false once correct policies are confirmed
+  cleanup_policy_dry_run = true
+
+  // keep [prod] images
+  cleanup_policies {
+    id     = "keep-all-prod"
+    action = "KEEP"
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["prod"]
+    }
+  }
+
+  // keep 5 most recent [dev] images
+  cleanup_policies {
+    id     = "delete-old-dev"
+    action = "DELETE"
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["dev"]
+      older_than   = format("%ds", 7 * 24 * 60 * 60) // 7 days
+    }
+  }
+  depends_on = [module.gcp_apis]
+}
+
+locals {
+  server_image_url = "${google_artifact_registry_repository.default.location}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.default.name}/${local.server_image_name}"
+}
+
 // Create build trigger
 resource "google_cloudbuild_trigger" "github-build-trigger" {
   name            = "github-push-to-branch"
@@ -146,6 +152,22 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     options {
       // small-scale project, no need for persistent logs
       logging = "CLOUD_LOGGING_ONLY"
+    }
+
+    images = ["${local.server_image_url}:$BRANCH_NAME"]
+
+    step {
+      id         = "build image"
+      name       = "gcr.io/buildpacks/builder:latest"
+      dir        = "service"
+      entrypoint = "pack"
+      args = [
+        "build",
+        "${local.server_image_url}",
+        "--builder=gcr.io/buildpacks/builder:latest",
+        "--network=cloudbuild",
+        "--tag=${local.server_image_name}:$BRANCH_NAME"
+      ]
     }
 
     step {
