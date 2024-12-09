@@ -171,7 +171,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
 
     step {
       id         = "build image"
-      name       = "gcr.io/buildpacks/builder:latest"
+      name       = "gcr.io/k8s-skaffold/pack"
       dir        = "service"
       entrypoint = "pack"
       args = [
