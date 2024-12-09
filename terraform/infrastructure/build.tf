@@ -4,13 +4,9 @@ locals {
   github_repo_url                    = "https://github.com/stnokott/spacetraders-map.git"
 }
 
-module "common_vars" {
-  source = "../modules/common_vars"
-}
-
 // token needs to be set manually after secret creation, see https://cloud.google.com/secret-manager/docs/add-secret-version#secretmanager-add-secret-version-gcloud
 resource "google_secret_manager_secret" "github_token" {
-  project   = var.project
+  project   = module.common_vars.project
   secret_id = local.github_token_secret_id
 
   replication {
@@ -34,26 +30,26 @@ resource "google_service_account" "cloudbuild_service_account" {
 }
 
 resource "google_project_iam_member" "cloudbuild_service_account" {
-  project = var.project
+  project = module.common_vars.project
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
 resource "google_project_iam_member" "cloudbuild_logs" {
-  project = var.project
+  project = module.common_vars.project
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
 resource "google_project_iam_member" "cloudbuild_builder" {
-  project = var.project
+  project = module.common_vars.project
   role    = "roles/cloudbuild.builds.builder"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
 // Allow editing project (required for `terraform apply` during Cloud Build)
 resource "google_project_iam_member" "cloudbuild_editor" {
-  project = var.project
+  project = module.common_vars.project
   role    = "roles/editor"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
@@ -79,8 +75,8 @@ resource "google_secret_manager_secret_iam_policy" "policy" {
 
 // Create GitHub connection
 resource "google_cloudbuildv2_connection" "github-connection" {
-  project  = var.project
-  location = provider::google::region_from_zone(var.zone)
+  project  = module.common_vars.project
+  location = provider::google::region_from_zone(module.common_vars.zone)
   name     = "github-connection"
 
   github_config {
@@ -95,14 +91,14 @@ resource "google_cloudbuildv2_connection" "github-connection" {
 // Link repository
 resource "google_cloudbuildv2_repository" "github-repo" {
   name              = "github-repo"
-  location          = provider::google::region_from_zone(var.zone)
+  location          = provider::google::region_from_zone(module.common_vars.zone)
   parent_connection = google_cloudbuildv2_connection.github-connection.name
   remote_uri        = local.github_repo_url
 }
 
 // Create Artifact Registry repository
 resource "google_artifact_registry_repository" "default" {
-  location      = provider::google::region_from_zone(var.zone)
+  location      = provider::google::region_from_zone(module.common_vars.zone)
   repository_id = module.common_vars.artifact_repository_name
   description   = "Container registry for Spacetraders Map project"
   format        = "docker"
@@ -134,7 +130,7 @@ resource "google_artifact_registry_repository" "default" {
 }
 
 locals {
-  server_image_url = "${google_artifact_registry_repository.default.location}-docker.pkg.dev/${var.project}/${module.common_vars.artifact_repository_name}/${module.common_vars.server_image_name}"
+  server_image_url = "${google_artifact_registry_repository.default.location}-docker.pkg.dev/${module.common_vars.project}/${module.common_vars.artifact_repository_name}/${module.common_vars.server_image_name}"
 }
 
 // Create build trigger
@@ -179,76 +175,16 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     }
 
     step {
-      id         = "tf init env"
+      id         = "terraform"
       name       = "hashicorp/terraform:1.10.0"
       entrypoint = "sh"
       args = [
         "-c",
         <<-EOT
-          if [ -d "environments/$BRANCH_NAME/" ]; then
-            cd environments/$BRANCH_NAME
-            terraform init
-          else
-            for dir in environments/*/
-            do 
-              cd $${dir}   
-              env=$${dir%*/}
-              env=$${env#*/}
-              echo ""
-              echo "*************** TERRAFORM INIT ******************"
-              echo "******* At environment: $${env} ********"
-              echo "*************************************************"
-              terraform init || exit 1
-              cd ../../
-            done
-          fi
-        EOT
-      ]
-    }
-
-    step {
-      id         = "tf plan env"
-      name       = "hashicorp/terraform:1.10.0"
-      entrypoint = "sh"
-      args = [
-        "-c",
-        <<-EOT
-          if [ -d "environments/$BRANCH_NAME/" ]; then
-            cd environments/$BRANCH_NAME
-            terraform plan
-          else
-            for dir in environments/*/
-            do 
-              cd $${dir}   
-              env=$${dir%*/}
-              env=$${env#*/}  
-              echo ""
-              echo "*************** TERRAFORM PLAN ******************"
-              echo "******* At environment: $${env} ********"
-              echo "*************************************************"
-              terraform plan || exit 1
-              cd ../../
-            done
-          fi
-        EOT
-      ]
-    }
-
-    step {
-      id         = "tf apply env"
-      name       = "hashicorp/terraform:1.10.0"
-      entrypoint = "sh"
-      args = [
-        "-c",
-        <<-EOT
-          if [ -d "environments/$BRANCH_NAME/" ]; then
-            cd environments/$BRANCH_NAME      
-            terraform apply -auto-approve
-          else
-            echo "***************************** SKIPPING APPLYING *******************************"
-            echo "Branch '$BRANCH_NAME' does not represent an official environment."
-            echo "*******************************************************************************"
-          fi
+          cd terraform/service
+          terraform workspace select $BRANCH_NAME
+          terraform init
+          terraform apply -auto-approve
         EOT
       ]
     }

@@ -17,7 +17,7 @@ resource "google_storage_bucket" "terraform-backend" {
 
 resource "local_file" "default" {
   file_permission = "0644"
-  filename        = "${path.root}/backend.tf"
+  filename        = "${path.root}/${var.filename}.tf"
 
   content = <<-EOT
   terraform {
