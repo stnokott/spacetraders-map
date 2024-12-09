@@ -183,6 +183,9 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         <<-EOT
           cd terraform/service
           terraform workspace select $BRANCH_NAME
+          echo "#####################################"
+          echo "# selected workspace '$BRANCH_NAME' #"
+          echo "#####################################"
           terraform init
           terraform apply -auto-approve
         EOT
