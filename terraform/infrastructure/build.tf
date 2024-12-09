@@ -182,6 +182,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         "-c",
         <<-EOT
           cd terraform/service
+          export TF_CLI_ARGS="-no-color"
           terraform init
           terraform workspace select $BRANCH_NAME
           echo "#####################################"
