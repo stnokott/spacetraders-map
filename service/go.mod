@@ -1,3 +1,3 @@
-module github.com/GoogleCloudPlatform/golang-samples/run/helloworld
+module spacetraders-map
 
 go 1.23.3
