@@ -1,9 +1,11 @@
 locals {
-  github_repo_url                    = "https://github.com/stnokott/spacetraders-map.git"
-  github_cloud_build_installation_id = 57972476 // from https://github.com/settings/installations
   github_token_secret_id             = "github_token"
-  artifact_repository_name           = "spacetraders-map"
-  server_image_name                  = "server"
+  github_cloud_build_installation_id = 57972476 // from https://github.com/settings/installations
+  github_repo_url                    = "https://github.com/stnokott/spacetraders-map.git"
+}
+
+module "common_vars" {
+  source = "../modules/common_vars"
 }
 
 // token needs to be set manually after secret creation, see https://cloud.google.com/secret-manager/docs/add-secret-version#secretmanager-add-secret-version-gcloud
@@ -27,7 +29,7 @@ data "google_project" "project" {}
 resource "google_service_account" "cloudbuild_service_account" {
   account_id                   = "cloudbuild-sa"
   display_name                 = "cloudbuild-sa"
-  description                  = "Cloud build service account"
+  description                  = "Cloud Build service account"
   create_ignore_already_exists = true
 }
 
@@ -101,7 +103,7 @@ resource "google_cloudbuildv2_repository" "github-repo" {
 // Create Artifact Registry repository
 resource "google_artifact_registry_repository" "default" {
   location      = provider::google::region_from_zone(var.zone)
-  repository_id = local.artifact_repository_name
+  repository_id = module.common_vars.artifact_repository_name
   description   = "Container registry for Spacetraders Map project"
   format        = "docker"
 
@@ -132,7 +134,7 @@ resource "google_artifact_registry_repository" "default" {
 }
 
 locals {
-  server_image_url = "${google_artifact_registry_repository.default.location}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.default.name}/${local.server_image_name}"
+  server_image_url = "${google_artifact_registry_repository.default.location}-docker.pkg.dev/${var.project}/${module.common_vars.artifact_repository_name}/${module.common_vars.server_image_name}"
 }
 
 // Create build trigger
@@ -161,19 +163,16 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     ]
 
     step {
-      id         = "build image"
-      name       = "gcr.io/k8s-skaffold/pack"
-      dir        = "service"
-      entrypoint = "pack"
+      id   = "build image"
+      name = "gcr.io/cloud-builders/docker"
       args = [
         "build",
-        "${local.server_image_url}",
-        "--builder=gcr.io/buildpacks/builder:latest",
-        "--network=cloudbuild",
-        "--tag=${local.server_image_url}:latest",
-        "--tag=${local.server_image_url}:$BRANCH_NAME",
-        "--tag=${local.server_image_url}:$SHORT_SHA"
+        "-t=${local.server_image_url}:latest",
+        "-t=${local.server_image_url}:$BRANCH_NAME",
+        "-t=${local.server_image_url}:$SHORT_SHA",
+        "."
       ]
+      dir = "./service"
     }
 
     step {
