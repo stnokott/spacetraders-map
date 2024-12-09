@@ -157,20 +157,6 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     images = ["${local.server_image_url}:$BRANCH_NAME"]
 
     step {
-      id         = "tf apply infrastructure"
-      name       = "hashicorp/terraform:1.10.0"
-      entrypoint = "sh"
-      args = [
-        "-c",
-        <<-EOT
-          cd infrastructure
-          terraform init
-          terraform apply -auto-approve
-        EOT
-      ]
-    }
-
-    step {
       id         = "build image"
       name       = "gcr.io/k8s-skaffold/pack"
       dir        = "service"
