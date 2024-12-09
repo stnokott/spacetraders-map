@@ -8,8 +8,8 @@ provider "google" {
 }
 
 module "backend" {
-  source  = "../modules/backend"
-  project = module.common_vars.project
-  env     = "infrastructure"
-  region  = provider::google::region_from_zone(module.common_vars.zone)
+  source      = "../modules/backend"
+  project     = module.common_vars.project
+  bucket_name = "infra"
+  region      = provider::google::region_from_zone(module.common_vars.zone)
 }

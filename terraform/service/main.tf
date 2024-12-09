@@ -7,28 +7,21 @@ provider "google" {
   zone    = module.common_vars.zone
 }
 
-locals {
-  // Our Environment is controlled by the workspace.
-  // The Cloud Build pipeline will select the appropriate workspace before running Terraform commands.
-  env = terraform.workspace
-}
-
 //
 // The following resources are all environment-specific, so we use the "env" variable for controlling behaviour.
 //
 
 module "backend" {
-  source   = "../modules/backend"
-  project  = module.common_vars.project
-  env      = terraform.workspace
-  region   = provider::google::region_from_zone(module.common_vars.zone)
-  filename = "backend_${terraform.workspace}"
+  source      = "../modules/backend"
+  project     = module.common_vars.project
+  bucket_name = var.env
+  region      = provider::google::region_from_zone(module.common_vars.zone)
 }
 
 module "vpc" {
   source  = "../modules/vpc"
   project = module.common_vars.project
-  env     = terraform.workspace
+  env     = var.env
   region  = provider::google::region_from_zone(module.common_vars.zone)
 }
 
@@ -41,7 +34,7 @@ module "firewall" {
 module "run" {
   source  = "../modules/run"
   project = module.common_vars.project
-  env     = terraform.workspace
+  env     = var.env
   region  = provider::google::region_from_zone(module.common_vars.zone)
   network = module.vpc.network
   subnet  = module.vpc.subnet

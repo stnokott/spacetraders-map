@@ -142,14 +142,14 @@ locals {
 
 // Create build trigger
 resource "google_cloudbuild_trigger" "github-build-trigger" {
-  name            = "github-push-to-branch"
+  name            = "push-dev-prod"
   location        = google_cloudbuildv2_connection.github-connection.location
   service_account = google_service_account.cloudbuild_service_account.id
 
   repository_event_config {
     repository = google_cloudbuildv2_repository.github-repo.id
     push {
-      branch = ".*"
+      branch = "^(dev|prod)$"
     }
   }
 
@@ -183,13 +183,9 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
       args = [
         "-c",
         <<-EOT
-          cd terraform/service
+          cd terraform/service/$BRANCH_NAME
           export TF_CLI_ARGS="-no-color"
           terraform init
-          terraform workspace select $BRANCH_NAME
-          echo "#####################################"
-          echo "# selected workspace '$BRANCH_NAME' #"
-          echo "#####################################"
           terraform apply -auto-approve
         EOT
       ]
