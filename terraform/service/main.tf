@@ -43,5 +43,6 @@ module "run" {
   project = module.common_vars.project
   env     = terraform.workspace
   region  = provider::google::region_from_zone(module.common_vars.zone)
+  network = module.vpc.network
   subnet  = module.vpc.subnet
 }

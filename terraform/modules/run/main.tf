@@ -28,15 +28,21 @@ resource "google_cloud_run_v2_service" "default" {
   location = var.region
 
   deletion_protection = false
+  ingress             = "INGRESS_TRAFFIC_ALL"
 
   template {
+    service_account = google_service_account.cloudrun_service_account.email
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project}/${module.common_vars.artifact_repository_name}/${module.common_vars.server_image_name}:${var.env}"
     }
-    service_account = google_service_account.cloudrun_service_account.email
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 1
+    }
 
     vpc_access {
       network_interfaces {
+        network    = var.network
         subnetwork = var.subnet
         tags       = ["http-server"]
       }
