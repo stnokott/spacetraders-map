@@ -154,7 +154,11 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
       logging = "CLOUD_LOGGING_ONLY"
     }
 
-    images = ["${local.server_image_url}"]
+    images = [
+      "${local.server_image_url}:latest",
+      "${local.server_image_url}:$BRANCH_NAME",
+      "${local.server_image_url}:$SHORT_SHA"
+    ]
 
     step {
       id         = "build image"
@@ -166,7 +170,9 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         "${local.server_image_url}",
         "--builder=gcr.io/buildpacks/builder:latest",
         "--network=cloudbuild",
-        "--tag=${local.server_image_name}:$BRANCH_NAME"
+        "--tag=${local.server_image_url}:latest",
+        "--tag=${local.server_image_url}:$BRANCH_NAME",
+        "--tag=${local.server_image_url}:$SHORT_SHA"
       ]
     }
 
