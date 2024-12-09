@@ -183,13 +183,9 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
       args = [
         "-c",
         <<-EOT
-          cd terraform/service
+          cd terraform/service/$BRANCH_NAME
           export TF_CLI_ARGS="-no-color"
           terraform init
-          terraform workspace select $BRANCH_NAME
-          echo "#####################################"
-          echo "# selected workspace '$BRANCH_NAME' #"
-          echo "#####################################"
           terraform apply -auto-approve
         EOT
       ]
