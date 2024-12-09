@@ -164,6 +164,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         "-c",
         <<-EOT
           cd infrastructure
+          terraform init
           terraform apply -auto-approve
         EOT
       ]
