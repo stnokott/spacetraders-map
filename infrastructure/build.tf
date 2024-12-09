@@ -154,7 +154,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
       logging = "CLOUD_LOGGING_ONLY"
     }
 
-    images = ["${local.server_image_url}:$BRANCH_NAME"]
+    images = ["${local.server_image_url}"]
 
     step {
       id         = "build image"
