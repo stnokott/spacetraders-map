@@ -29,6 +29,10 @@ resource "google_cloud_run_v2_service" "default" {
 
   deletion_protection = false
   ingress             = "INGRESS_TRAFFIC_ALL"
+  traffic {
+    // always send traffic to latest revision only
+    type = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+  }
 
   template {
     service_account = google_service_account.cloudrun_service_account.email
