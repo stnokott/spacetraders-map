@@ -203,8 +203,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         "--builder=gcr.io/buildpacks/builder:latest",
         "--network=cloudbuild",
         "--tag=${local.server_image_url}:latest",
-        "--tag=${local.server_image_url}:${each.value.deploy_to}",
-        "--tag=${local.server_image_url}:$SHORT_SHA",
+        "--tag=${local.server_image_url}:${each.value.deploy_to}"
       ]
     }
 
