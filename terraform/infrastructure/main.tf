@@ -198,10 +198,10 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         name       = "golang:1.23"
         dir        = "./service"
         entrypoint = "/bin/bash"
-        args = [
-          "-c",
-          "go test -timeout 5m -v ./..."
-        ]
+        args = concat(
+          ["-c"],
+          ["go", "test", "-timeout", "5m", "-v", "./..."]
+        )
       }
     }
 
@@ -212,15 +212,15 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         name       = "gcr.io/k8s-skaffold/pack"
         dir        = "./service"
         entrypoint = "pack"
-        args = [
-          "build",
-          "${local.server_image_url}",
-          "--publish", // immediately publish so we can directly use it in the build step 
-          "--builder=gcr.io/buildpacks/builder:latest",
-          "--network=cloudbuild",
-          each.value.steps.build.image_tag == "prod" ? "--tag=${local.server_image_url}:latest" : "",
-          "--tag=${local.server_image_url}:${each.value.steps.build.image_tag}"
-        ]
+        args = concat(
+          ["build"],
+          ["${local.server_image_url}"],
+          ["--publish"], // immediately publish so we can directly use it in the build step 
+          ["--builder", "gcr.io/buildpacks/builder:latest"],
+          ["--network", "cloudbuild"],
+          ["--tag", "${local.server_image_url}:${each.value.steps.build.image_tag}"],
+          each.value.steps.build.image_tag == "prod" ? ["--tag", "${local.server_image_url}:latest"] : []
+        )
       }
     }
 
@@ -230,15 +230,17 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         id         = "terraform"
         name       = "hashicorp/terraform:1.10.0"
         entrypoint = "sh"
-        args = [
-          "-c",
-          <<-EOT
-          cd terraform/service/${each.value.steps.deploy.env}
-          export TF_CLI_ARGS="-no-color"
-          terraform init
-          terraform apply -auto-approve
-        EOT
-        ]
+        args = concat(
+          ["-c"],
+          [
+            <<-EOT
+              cd terraform/service/${each.value.steps.deploy.env}
+              export TF_CLI_ARGS="-no-color"
+              terraform init
+              terraform apply -auto-approve
+            EOT
+          ]
+        )
       }
     }
   }
