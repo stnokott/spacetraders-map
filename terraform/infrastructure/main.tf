@@ -139,14 +139,14 @@ resource "google_artifact_registry_repository" "default" {
     }
   }
 
-  // keep 5 most recent [dev] images
+  // keep [dev] images of last 7d
   cleanup_policies {
-    id     = "delete-old-dev"
-    action = "DELETE"
+    id     = "keep-new-dev"
+    action = "KEEP"
     condition {
       tag_state    = "TAGGED"
       tag_prefixes = ["dev"]
-      older_than   = format("%ds", 7 * 24 * 60 * 60) // 7 days
+      newer_than   = format("%ds", 7 * 24 * 60 * 60) // 7 days
     }
   }
   depends_on = [module.gcp_apis]
@@ -191,35 +191,55 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
       logging = "CLOUD_LOGGING_ONLY"
     }
 
-    step {
-      id         = "build image"
-      name       = "gcr.io/k8s-skaffold/pack"
-      dir        = "service"
-      entrypoint = "pack"
-      args = [
-        "build",
-        "${local.server_image_url}",
-        "--publish", // immediately publish so we can directly use it in the next step 
-        "--builder=gcr.io/buildpacks/builder:latest",
-        "--network=cloudbuild",
-        "--tag=${local.server_image_url}:latest",
-        "--tag=${local.server_image_url}:${each.value.deploy_to}"
-      ]
+    dynamic "step" {
+      for_each = each.value.steps.test != null ? [1] : []
+      content {
+        id         = "go test"
+        name       = "golang:1.23"
+        dir        = "./service"
+        entrypoint = "/bin/bash"
+        args = [
+          "-c",
+          "go test -timeout 5m -v ./..."
+        ]
+      }
     }
 
-    step {
-      id         = "terraform"
-      name       = "hashicorp/terraform:1.10.0"
-      entrypoint = "sh"
-      args = [
-        "-c",
-        <<-EOT
-          cd terraform/service/${each.value.deploy_to}
+    dynamic "step" {
+      for_each = each.value.steps.build != null ? [1] : []
+      content {
+        id         = "build image"
+        name       = "gcr.io/k8s-skaffold/pack"
+        dir        = "./service"
+        entrypoint = "pack"
+        args = [
+          "build",
+          "${local.server_image_url}",
+          "--publish", // immediately publish so we can directly use it in the build step 
+          "--builder=gcr.io/buildpacks/builder:latest",
+          "--network=cloudbuild",
+          each.value.steps.build.image_tag == "prod" ? "--tag=${local.server_image_url}:latest" : "",
+          "--tag=${local.server_image_url}:${each.value.steps.build.image_tag}"
+        ]
+      }
+    }
+
+    dynamic "step" {
+      for_each = each.value.steps.deploy != null ? [1] : []
+      content {
+        id         = "terraform"
+        name       = "hashicorp/terraform:1.10.0"
+        entrypoint = "sh"
+        args = [
+          "-c",
+          <<-EOT
+          cd terraform/service/${each.value.steps.deploy.env}
           export TF_CLI_ARGS="-no-color"
           terraform init
           terraform apply -auto-approve
         EOT
-      ]
+        ]
+      }
     }
   }
 }
