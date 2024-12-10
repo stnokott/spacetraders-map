@@ -197,10 +197,12 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         id         = "go test"
         name       = "golang:1.23"
         dir        = "./service"
-        entrypoint = "/bin/bash"
+        entrypoint = "go"
         args = concat(
-          ["-c"],
-          ["go", "test", "-timeout", "5m", "-v", "./..."]
+          ["test"],
+          ["-timeout", "5m"],
+          ["-v"],
+          ["./..."]
         )
       }
     }
