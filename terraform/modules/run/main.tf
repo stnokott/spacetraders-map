@@ -23,6 +23,15 @@ resource "google_project_iam_member" "cloudrun_service_account" {
   member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
 }
 
+// Query server image from registry so that we can get its URI for the deployment.
+data "google_artifact_registry_docker_image" "server_image" {
+  location      = var.region
+  repository_id = module.common_vars.artifact_repository_name
+  // Use image tagged with environment
+  image_name = "${module.common_vars.server_image_name}:${var.env}"
+}
+
+// Create service
 resource "google_cloud_run_v2_service" "default" {
   name     = "server-${var.env}"
   location = var.region
@@ -38,7 +47,10 @@ resource "google_cloud_run_v2_service" "default" {
   template {
     service_account = google_service_account.cloudrun_service_account.email
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project}/${module.common_vars.artifact_repository_name}/${module.common_vars.server_image_name}:${var.env}"
+      // `self_link` contains the full hash of the image.
+      // This means that when the image is updated, the hash changes and Terraform recreates the service.
+      // If we used a static, tagged image name (e.g. "image:dev"), this would not happen as Terraform wouldn't know the deployment requires an update.
+      image = data.google_artifact_registry_docker_image.server_image.self_link
     }
     scaling {
       min_instance_count = 1
