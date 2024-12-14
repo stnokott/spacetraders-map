@@ -6,3 +6,8 @@ variable "env" {
     error_message = "env needs to be one of [\"dev\", \"prod\"]."
   }
 }
+
+variable "image_tag" {
+  type        = string
+  description = "Image tag to be deployed."
+}

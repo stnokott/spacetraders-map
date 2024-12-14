@@ -1,6 +1,7 @@
 module "service" {
-  source = "../"
-  env    = "prod"
+  source    = "../"
+  env       = "prod"
+  image_tag = var.image_tag
 }
 
 output "public_uri" {

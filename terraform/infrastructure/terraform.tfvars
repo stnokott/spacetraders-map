@@ -28,14 +28,14 @@ triggers = {
     }
   }
   push_main = {
-    name         = "push-main"
-    description  = "Deploy to [prod] when pushed/merged to 'main'"
+    name         = "tag-semver"
+    description  = "Deploy to [prod] when SemVer tag pushed"
     event_type   = "push"
-    filter_type  = "branch"
-    filter_value = "^main$"
+    filter_type  = "tag"
+    filter_value = "^v\\.\\d+\\.\\d+\\.\\d+$"
     steps = {
       build = {
-        image_tag = "prod"
+        image_tag = "$TAG_NAME"
       }
       deploy = {
         env = "prod"

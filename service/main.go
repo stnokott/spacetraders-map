@@ -27,5 +27,5 @@ func main() {
 
 func handler(w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, "Hello World!\n\n")
-	fmt.Fprintf(w, "%s build (%s)", Env, Commit)
+	fmt.Fprintf(w, "%s build %s", Version, Commit)
 }
