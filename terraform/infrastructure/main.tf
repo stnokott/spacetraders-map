@@ -166,6 +166,10 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
   location        = google_cloudbuildv2_connection.github-connection.location
   service_account = google_service_account.cloudbuild_service_account.id
 
+  approval_config {
+    approval_required = each.value.require_approval
+  }
+
   repository_event_config {
     repository = google_cloudbuildv2_repository.github-repo.id
 

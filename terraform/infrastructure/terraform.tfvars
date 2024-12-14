@@ -51,11 +51,12 @@ triggers = {
   }
 
   preprod_deploy = {
-    name         = "deploy-preprod"
-    description  = "Deploy to [preprod] when merged to 'main'. Used as deploy condition for [prod]."
-    event_type   = "push"
-    filter_type  = "branch"
-    filter_value = "^main$"
+    name             = "deploy-preprod"
+    description      = "Deploy to [preprod] when merged to 'main'. Used as deploy condition for [prod]."
+    event_type       = "push"
+    filter_type      = "branch"
+    filter_value     = "^main$"
+    require_approval = true // require approval so we don't redundantly trigger this step when we don't intend to release to prod
     steps = {
       build = {
         image_tag = "preprod"
