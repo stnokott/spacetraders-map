@@ -54,8 +54,8 @@ variable "triggers" {
 
   validation {
     condition = alltrue([for trigger in var.triggers :
-      trigger.steps.deploy == null ? true : contains(["dev", "prod"], trigger.steps.deploy.env)
+      trigger.steps.deploy == null ? true : contains(["dev", "preprod", "prod"], trigger.steps.deploy.env)
     ])
-    error_message = "Invalid value for steps.deploy.env, needs to be one of ('dev', 'prod')."
+    error_message = "Invalid value for steps.deploy.env, needs to be one of ('dev', 'preprod', 'prod')."
   }
 }
