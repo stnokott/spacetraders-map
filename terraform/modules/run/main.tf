@@ -28,7 +28,7 @@ data "google_artifact_registry_docker_image" "server_image" {
   location      = var.region
   repository_id = module.common_vars.artifact_repository_name
   // Use image tagged with environment
-  image_name = "${module.common_vars.server_image_name}:${var.env}"
+  image_name = "${module.common_vars.server_image_name}:${var.image_tag}"
 }
 
 // Create service

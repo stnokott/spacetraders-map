@@ -58,11 +58,4 @@ variable "triggers" {
     ])
     error_message = "Invalid value for steps.deploy.env, needs to be one of ('dev', 'prod')."
   }
-
-  validation {
-    condition = alltrue([for trigger in var.triggers :
-      trigger.steps.deploy == null ? true : trigger.steps.build.image_tag == trigger.steps.deploy.env
-    ])
-    error_message = "When specifying steps.deploy, steps.build.image_tag and steps.deploy.env need to match"
-  }
 }

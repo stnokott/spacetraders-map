@@ -32,10 +32,11 @@ module "firewall" {
 }
 
 module "run" {
-  source  = "../modules/run"
-  project = module.common_vars.project
-  env     = var.env
-  region  = provider::google::region_from_zone(module.common_vars.zone)
-  network = module.vpc.network
-  subnet  = module.vpc.subnet
+  source    = "../modules/run"
+  project   = module.common_vars.project
+  env       = var.env
+  image_tag = var.image_tag
+  region    = provider::google::region_from_zone(module.common_vars.zone)
+  network   = module.vpc.network
+  subnet    = module.vpc.subnet
 }

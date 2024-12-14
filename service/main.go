@@ -25,10 +25,7 @@ func main() {
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	name := os.Getenv("NAME")
-	if name == "" {
-		name = "World"
-	}
-	fmt.Fprintf(w, "Hello %s!\n", name)
+func handler(w http.ResponseWriter, _ *http.Request) {
+	fmt.Fprint(w, "Hello World!\n\n")
+	fmt.Fprintf(w, "%s build %s", Version, Commit)
 }

@@ -217,11 +217,22 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
         args = concat(
           ["build"],
           ["${local.server_image_url}"],
-          ["--publish"], // immediately publish so we can directly use it in the build step 
-          ["--builder", "gcr.io/buildpacks/builder:latest"],
           ["--network", "cloudbuild"],
+          ["--builder", "gcr.io/buildpacks/builder:latest"],
           ["--tag", "${local.server_image_url}:${each.value.steps.build.image_tag}"],
-          each.value.steps.build.image_tag == "prod" ? ["--tag", "${local.server_image_url}:latest"] : []
+          ["--publish"], // immediately publish so we can directly use it in the build step
+          [
+            "--env",
+            // set -ldflags for build
+            format("GOOGLE_GOLDFLAGS=%s", join(" ", concat(
+              // remove debug information if not building for [dev]
+              each.value.steps.build.image_tag != "dev" ? ["-s -w"] : [],
+              // set env variable
+              ["-X 'main.Version=${each.value.steps.build.image_tag}'"],
+              // set commit hash variable
+              ["-X 'main.Commit=$SHORT_SHA'"]
+            )))
+          ]
         )
       }
     }
@@ -239,7 +250,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
               cd terraform/service/${each.value.steps.deploy.env}
               export TF_CLI_ARGS="-no-color"
               terraform init
-              terraform apply -auto-approve
+              terraform apply -auto-approve -var 'image_tag=${each.value.steps.build.image_tag}'
             EOT
           ]
         )
