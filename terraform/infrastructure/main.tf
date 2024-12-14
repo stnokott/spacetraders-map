@@ -224,7 +224,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
           [
             "--env",
             // set -ldflags for build
-            format("GOOGLE_GOLDFLAGS=\"%s\"", join(" ", concat(
+            format("GOOGLE_GOLDFLAGS=%s", join(" ", concat(
               // remove debug information only for [prod] build
               each.value.steps.build.image_tag == "prod" ? ["-s -w"] : [],
               // set env variable
