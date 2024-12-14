@@ -27,7 +27,24 @@ triggers = {
       }
     }
   }
-  push_main = {
+
+  preprod_deploy = {
+    name         = "preprod-deploy"
+    description  = "Deploy to [preprod] when merged to 'main'. Used as deploy condition for [prod]."
+    event_type   = "push"
+    filter_type  = "branch"
+    filter_value = "^main$"
+    steps = {
+      build = {
+        image_tag = "preprod"
+      }
+      deploy = {
+        env = "preprod"
+      }
+    }
+  }
+
+  tag_semver = {
     name         = "tag-semver"
     description  = "Deploy to [prod] when SemVer tag pushed"
     event_type   = "push"
