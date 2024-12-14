@@ -1,10 +1,11 @@
 variable "triggers" {
   type = map(object({
-    name         = string
-    description  = string
-    event_type   = string
-    filter_type  = string
-    filter_value = string
+    name             = string
+    description      = string
+    event_type       = string
+    filter_type      = string
+    filter_value     = string
+    require_approval = optional(bool, false)
     steps = object({
       lint = optional(object({}))
       test = optional(object({}))
