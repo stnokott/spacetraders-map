@@ -192,6 +192,20 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
     }
 
     dynamic "step" {
+      for_each = each.value.steps.lint != null ? [1] : []
+      content {
+        id   = "lint"
+        name = "golangci/golangci-lint:latest"
+        dir  = "./service"
+        args = concat(
+          ["golangci-lint", "run"],
+          ["--color", "never"] // Cloud Build logs can't handle colored output
+        )
+        wait_for = ["-"]
+      }
+    }
+
+    dynamic "step" {
       for_each = each.value.steps.test != null ? [1] : []
       content {
         id         = "go test"
@@ -204,6 +218,7 @@ resource "google_cloudbuild_trigger" "github-build-trigger" {
           ["-v"],
           ["./..."]
         )
+        wait_for = ["-"] // run in parallel to linting if both are present
       }
     }
 

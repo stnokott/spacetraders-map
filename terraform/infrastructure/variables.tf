@@ -6,6 +6,7 @@ variable "triggers" {
     filter_type  = string
     filter_value = string
     steps = object({
+      lint = optional(object({}))
       test = optional(object({}))
       build = optional(object({
         image_tag = string
