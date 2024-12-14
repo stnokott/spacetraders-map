@@ -1,0 +1,42 @@
+run:
+  timeout: "3m"
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - gocritic
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+
+    - bodyclose
+    - decorder
+    - copyloopvar
+    - goconst
+    - nilerr
+
+    - testifylint
+
+linters-settings:
+  errcheck:
+    check-blank: true
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+  goconst:
+    match-constant: true
+    min-len: 3
+    min-occurrences: 2
+    ignore-tests: true
+  testifylint:
+    enable-all: true
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
