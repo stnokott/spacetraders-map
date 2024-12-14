@@ -21,6 +21,7 @@ triggers = {
     filter_type  = "branch"
     filter_value = "^main$"
     steps = {
+      lint = {}
       test = {}
       build = {
         image_tag = "$BRANCH_NAME"
