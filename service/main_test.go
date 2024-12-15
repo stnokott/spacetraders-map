@@ -9,14 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGETBasepath(t *testing.T) {
-	t.Run("GET basepath", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		response := httptest.NewRecorder()
+// testRequest spins up a new httptest.Server, requests the provided path and runs assertion on the result.
+func testRequest(t *testing.T, reqPath string, assertion func(t *testing.T, resp *http.Response)) {
+	ts := httptest.NewServer(newServer())
+	defer ts.Close()
 
-		handleHome(response, request, tmpl)
+	request, _ := http.NewRequest(http.MethodGet, ts.URL+reqPath, nil)
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatalf("request %s: %v", reqPath, err)
+	}
+	assertion(t, resp)
+}
 
-		resp := response.Result()
+func TestHome(t *testing.T) {
+	testRequest(t, "/", func(t *testing.T, resp *http.Response) {
 		body, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
 
