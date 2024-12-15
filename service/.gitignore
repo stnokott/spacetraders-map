@@ -1,0 +1,5 @@
+# Go
+*.exe
+
+# NodeJS
+node_modules/

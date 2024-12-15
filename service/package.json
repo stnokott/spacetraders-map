@@ -1,0 +1,23 @@
+{
+  "name": "spacetraders-map",
+  "version": "1.0.0",
+  "description": "NodeJS config mainly required for TailwindCSS",
+  "main": "index.js",
+  "scripts": {
+    "build": "tailwindcss build -i static/css/input.css -o static/css/tailwind.css",
+    "watch": "tailwindcss build -i static/css/input.css -o static/css/tailwind.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stnokott/spacetraders-map.git"
+  },
+  "author": "stnokott",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stnokott/spacetraders-map/issues"
+  },
+  "homepage": "https://github.com/stnokott/spacetraders-map#readme",
+  "dependencies": {
+    "tailwindcss": "^3.4.16"
+  }
+}

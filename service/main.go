@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"log"
 	"net/http"
 	"os"
@@ -28,9 +29,16 @@ func main() {
 	}
 }
 
+//go:embed static
+var static embed.FS
+
 func newServer() http.Handler {
 	mux := http.NewServeMux()
 
+	// Serve static files
+	mux.Handle("/static/", http.FileServer(http.FS(static)))
+
+	// Server homepage
 	mux.Handle("/", templ.Handler(templates.Home(templates.HomeData{
 		Title:   "Spacetraders Map",
 		Version: Version,

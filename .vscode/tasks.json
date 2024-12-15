@@ -1,0 +1,24 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "go generate",
+			"options": {
+				"cwd": "${workspaceFolder}/service"
+			},
+			"command": "go",
+			"args": [
+				"generate",
+				"./..."
+			],
+			"problemMatcher": [
+				"$go"
+			],
+			"group": "build",
+			"icon": {
+				"id": "refresh"
+			}
+		}
+	]
+}

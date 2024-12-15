@@ -2,3 +2,5 @@
 package templates
 
 //go:generate templ generate
+
+//go:generate npm run build
