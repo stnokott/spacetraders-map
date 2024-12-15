@@ -14,7 +14,7 @@ func TestGETBasepath(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
-		handler(response, request)
+		handleHome(response, request, tmpl)
 
 		resp := response.Result()
 		body, _ := io.ReadAll(resp.Body)

@@ -1,6 +1,8 @@
 package main
 
 var (
-	Version string = "?.?.?"
-	Commit  string = "??????"
+	// Version of the current build
+	Version = "0.0.0"
+	// Commit of the current build
+	Commit = "unknown"
 )
