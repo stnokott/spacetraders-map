@@ -4,8 +4,8 @@
   "description": "NodeJS config mainly required for TailwindCSS",
   "main": "index.js",
   "scripts": {
-    "build": "tailwindcss build -i static/css/input.css -o static/css/tailwind.css",
-    "watch": "tailwindcss build -i static/css/input.css -o static/css/tailwind.css --watch"
+    "build": "tailwindcss build -i static/css/input.css -o static/css/tailwind.css --minify",
+    "watch": "tailwindcss build -i static/css/input.css -o static/css/tailwind.css --minify --watch"
   },
   "repository": {
     "type": "git",
