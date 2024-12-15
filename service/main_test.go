@@ -16,6 +16,9 @@ func testRequest(t *testing.T, reqPath string, assertion func(t *testing.T, resp
 
 	request, _ := http.NewRequest(http.MethodGet, ts.URL+reqPath, nil)
 	resp, err := http.DefaultClient.Do(request)
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	if err != nil {
 		t.Fatalf("request %s: %v", reqPath, err)
 	}
