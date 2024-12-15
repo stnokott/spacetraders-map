@@ -1,0 +1,7 @@
+package templates
+
+// Thanks go to https://codepen.io/noahblon/post/coloring-svgs-in-css-background-images
+templ homeBackground() {
+	<div class="absolute inset-0 bg-slate-700"></div>
+	<div class="absolute inset-0 bg-slate-800 [mask-image:url('/static/svg/topography.svg'),linear-gradient(#000_0_0)] [mask-composite:exclude] bg-center"></div>
+}

@@ -14,13 +14,15 @@ templ Home(data HomeData) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ data.Title }</title>
 			<link rel="stylesheet" href="/static/css/tailwind.css"/>
+			<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
 		</head>
-		<body>
+		<body class="text-slate-300">
+			@homeBackground()
 			<div id="map">
 				@mapComp()
 			</div>
-			<div id="build-info">
-				<small>{ data.Version } build { data.Commit }</small>
+			<div id="build-info" class="absolute bottom-0 right-0 mb-3 mr-3 px-3 py-1 rounded bg-slate-700 text-slate-500 shadow-xl">
+				<div class="font-light">{ data.Version } build { data.Commit }</div>
 			</div>
 		</body>
 	</html>
