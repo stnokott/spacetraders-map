@@ -13,8 +13,7 @@
 			"buildFlags": "-ldflags '-X main.Version=debug'",
 			"env": {
 				"PORT": "8080"
-			},
-			"preLaunchTask": "go generate"
+			}
 		}
 	]
 }

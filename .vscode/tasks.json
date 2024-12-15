@@ -3,21 +3,85 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"label": "go generate",
+			"label": "tailwind watch",
+			"command": "npm",
+			"args": [
+				"run",
+				"watch"
+			],
 			"options": {
 				"cwd": "${workspaceFolder}/service"
 			},
-			"command": "go",
+			"problemMatcher": [],
+			"isBackground": true,
+			"runOptions": {
+				"instanceLimit": 1
+			},
+			"group": "build",
+			"icon": {
+				"id": "refresh",
+				"color": "terminal.ansiBlue"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "templ watch",
+			"command": "templ",
 			"args": [
 				"generate",
-				"./..."
+				"--watch",
+				"--open-browser=false",
+				"-v"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/service"
+			},
+			"problemMatcher": [],
+			"isBackground": true,
+			"runOptions": {
+				"instanceLimit": 1
+			},
+			"group": "build",
+			"icon": {
+				"id": "refresh",
+				"color": "terminal.ansiCyan"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "go watch",
+			"command": "go",
+			"args": [
+				"run",
+				"github.com/cosmtrek/air@v1.51.0",
+				"--build.full_bin",
+				"\"go run .\"",
+				"--build.exclude_dir",
+				"node_modules",
+				"--build.include_ext",
+				"go",
+				"--build.stop_on_error",
+				"true",
+				"--misc.clean_on_exit",
+				"true"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/service",
+				"env": {
+					"PORT": "8080"
+				}
+			},
 			"problemMatcher": [
 				"$go"
 			],
+			"isBackground": true,
+			"runOptions": {
+				"instanceLimit": 1
+			},
 			"group": "build",
 			"icon": {
-				"id": "refresh"
+				"id": "refresh",
+				"color": "terminal.ansiCyan"
 			}
 		}
 	]
